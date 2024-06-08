@@ -3,10 +3,9 @@ from ekgdata import EKGdata
 from person import Person
 from datetime import datetime
 
-
-
 if __name__ == "__main__":
     st.set_page_config(page_title="EKG Data Analysis Tool", page_icon=":heart:")
+    
     def creds_entered():
         if st.session_state["user"].strip() == "Julian" and st.session_state["password"].strip() == "Passwort":
             st.session_state["logged_in"] = True
@@ -33,7 +32,6 @@ if __name__ == "__main__":
                 st.text_input(label="Passwort", value="", key="password", type="password", on_change=creds_entered)
                 return False
             
-    
     if authenticate_user():
         st.title("EKG Data Analysis Tool")
 
@@ -62,9 +60,8 @@ if __name__ == "__main__":
                         st.write("Die Herzfrequenz lautet:")
                         ekg_by_id.find_peaks(threshold=320, distance=150)
                         st.write(ekg_by_id.estimate_hr())
-                        st.plotly_chart(ekg_by_id.plot_time_series())
+                        ekg_by_id.display_test_date_and_plot()  
                     else:
                         st.write("Keine EKG-Daten mit der gegebenen ID gefunden.")
             else:
                 st.write("Keine Person mit diesem Namen gefunden.")
-

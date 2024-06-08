@@ -81,6 +81,7 @@ if __name__ == "__main__":
                             ekg_by_id.find_peaks(threshold=320, distance=150)
                             st.write(ekg_by_id.estimate_hr())
                             st.plotly_chart(ekg_by_id.plot_time_series())
+                            ekg_by_id.display_test_date()
                         else:
                             st.write("Keine EKG-Daten mit der gegebenen ID gefunden.")
                     else:

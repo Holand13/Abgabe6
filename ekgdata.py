@@ -1,9 +1,9 @@
 import json
 import pandas as pd
 import scipy.signal
-import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objs as go
+import streamlit as st
 
 
 class EKGdata:
@@ -15,6 +15,7 @@ class EKGdata:
         self.date = ekg_dict["date"]
         self.data = ekg_dict["result_link"]
         self.df = pd.read_csv(self.data, sep='\t', header=None, names=['EKG in mV', 'Time in ms'])
+        self.df['Time in s'] = self.df['Time in ms'] / 1000  # Konvertieren der Zeit von Millisekunden in Sekunden
 
     @staticmethod
     def find_ekg_data_by_id(ekg_id):
@@ -25,19 +26,19 @@ class EKGdata:
         return None
 
     @classmethod
-    def load_by_id(self,ekg_id_input):
+    def load_by_id(self, ekg_id_input):
         ekg_dict = self.find_ekg_data_by_id(ekg_id_input)
         if ekg_dict:
             return self(ekg_dict)
         else:
             return None
 
-    def find_peaks(self, threshold,distance):
+    def find_peaks(self, threshold, distance):
         series = self.df['EKG in mV']
-        peaks, _ = scipy.signal.find_peaks(series, height=threshold,distance=distance)
+        peaks, _ = scipy.signal.find_peaks(series, height=threshold, distance=distance)
         self.peaks = peaks
         return peaks
-    
+
     def estimate_hr(self):
         if self.peaks is not None:
             num_peaks = len(self.peaks)
@@ -48,26 +49,33 @@ class EKGdata:
             print("No peaks found. Heart rate cannot be calculated.")
         self.heart_rate = heart_rate
         return heart_rate
-    
+
     def plot_time_series(self):
         fig = go.Figure()
-        
+
         # Add EKG time series data
-        fig.add_trace(go.Scatter(x=self.df['Time in ms'], y=self.df['EKG in mV'],
+        fig.add_trace(go.Scatter(x=self.df['Time in s'], y=self.df['EKG in mV'],  
                                  mode='lines', name='EKG in mV'))
-        
+
         # Add peaks
         if self.peaks is not None:
-            fig.add_trace(go.Scatter(x=self.df['Time in ms'].iloc[self.peaks], 
+            fig.add_trace(go.Scatter(x=self.df['Time in s'].iloc[self.peaks],  
                                      y=self.df['EKG in mV'].iloc[self.peaks],
                                      mode='markers', name='Peaks',
                                      marker=dict(color='red', size=10, symbol='x')))
-        
+
         fig.update_layout(title='EKG Time Series with Peaks',
-                          xaxis_title='Time in ms',
+                          xaxis_title='Time in s',  
                           yaxis_title='EKG in mV')
-        
+
         return fig
+
+    def display_test_date_and_plot(self):
+        st.plotly_chart(self.plot_time_series())  
+        st.write(f"Test Datum: {self.date}")  # Anzeigen des Testdatums
+         
+
+
 '''
     def display(self):
         print(f"ID: {self.id}")
