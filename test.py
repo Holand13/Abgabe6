@@ -4,7 +4,7 @@ from person import Person
 from datetime import datetime
 
 if __name__ == "__main__":
-    
+    #Passwort = 1234 und Nutzername = Nutzername
     def creds_entered():
         if st.session_state["user"].strip() == "Nutzername" and st.session_state["password"].strip() == "1234":
             st.session_state["logged_in"] = True
