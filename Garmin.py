@@ -1,4 +1,4 @@
-'''
+
 import ezgpx
 
 # Parse GPX file
@@ -16,7 +16,7 @@ gpx.folium_plot(tiles="OpenStreetMap",
                 file_path="Map.Activity.html",
                 open=True)
 
-'''
+
 '''
 
 from xml.dom import minidom
