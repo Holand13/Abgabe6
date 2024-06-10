@@ -58,7 +58,7 @@ if __name__ == "__main__":
             # Load person data and populate all_ekg_data class variable
             person_data = Person.load_person_data()
             for person in person_data:
-                EKGdata.all_ekg_data.extend(person["ekg_tests"])
+                EKGdata.all_ekg_data.extend(person.get("ekg_tests", []))  # Use get method to avoid KeyError
             tab1, tab2 = st.tabs(["Personenangabe", "EKG-Tests"])
             with tab1:
                 person_names = Person.get_person_list(person_data)
@@ -74,7 +74,7 @@ if __name__ == "__main__":
                         st.write("Die maximale Herzfrequenz beträgt:", person_objekt.calc_max_heart_rate(), "bpm")
             with tab2:
                 if selected_person_name != "Auswählen":
-                    selected_ekg_id = st.selectbox("Wählen Sie eine EKG-ID", [ekg["id"] for ekg in person_dict["ekg_tests"]])
+                    selected_ekg_id = st.selectbox("Wählen Sie eine EKG-ID", [ekg["id"] for ekg in person_dict.get("ekg_tests", [])])
                     if selected_ekg_id:
                         ekg_by_id = EKGdata.load_by_id(selected_ekg_id)
                         if ekg_by_id:
@@ -86,7 +86,6 @@ if __name__ == "__main__":
                             st.write("Keine EKG-Daten mit der gegebenen ID gefunden.")
                     else:
                         st.write("Keine Person mit diesem Namen gefunden.")
-        
         elif selected_page == "Neuen Datensatz anlegen":
             st.title("Neuen Datensatz anlegen")
         # Create a new person
@@ -94,16 +93,21 @@ if __name__ == "__main__":
             new_person = {}
             new_person["firstname"] = st.text_input("Vorname")
             new_person["lastname"] = st.text_input("Nachname")
-            min_date = date(1900, 1, 1)
-            max_date = date.today()
-            new_person["date_of_birth"] = st.date_input("Geburtsdatum", min_value=min_date, max_value=max_date)
+            year = st.text_input("Geburtsjahr (z.B. 1999)")
+            try:
+                new_person["date_of_birth"] = int(year)
+                valid_year = True
+            except ValueError:
+                st.error("Bitte geben Sie ein gültiges Geburtsjahr ein.")
+                valid_year = False
             new_person["picture_path"] = "data/pictures/none.jpg"
-            #neue id erstellen
+            new_person["ekg_tests"] = []
             new_person["id"] = Person.get_new_id()
             if st.button("Person anlegen"):
                 new_person_obj = Person(new_person)
                 new_person_obj.save_person()
                 st.success("Person erfolgreich angelegt.")
+                st.experimental_rerun()
     
         elif selected_page == "Einstellungen":
             st.title("Einstellungen")

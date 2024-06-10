@@ -69,15 +69,16 @@ class Person:
        
         
     def __init__(self, person_dict):
-        self.date_of_birth = person_dict["date_of_birth"]
+        self.date_of_birth = int(person_dict["date_of_birth"])
         self.firstname = person_dict["firstname"]
         self.lastname = person_dict["lastname"]
         self.picture_path = person_dict["picture_path"]
         self.id = person_dict["id"]
+        self.ekg_tests = person_dict.get("ekg_tests", [])  # Initialize ekg_tests with an empty list if not present
         
 
     def calc_age(self):
-        today = datetime.now()
+        today = datetime.now().date()
         age = today.year - self.date_of_birth
         self.age = age
         return age
@@ -99,6 +100,12 @@ class Person:
             return 1
         
     def save_person(self):
+        """Saves the Person object's data to the JSON file."""
         person_data = Person.load_person_data()
-        person_data.append(self.__dict__)
-        json.dump(person_data)
+        new_person_data = self.__dict__.copy()
+        new_person_data["date_of_birth"] = str(self.date_of_birth)  # Convert date to string
+        person_data.append(new_person_data)
+
+        with open("data/person_db.json", "w", encoding='utf-8') as file:
+            json.dump(person_data, file, indent=4)
+

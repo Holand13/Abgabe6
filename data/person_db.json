@@ -45,5 +45,29 @@
                 "result_link": "data/ekg_data/03_Ruhe.txt"
             }
         ]
+    },
+    {
+        "date_of_birth": "1999",
+        "firstname": "A",
+        "lastname": "B",
+        "picture_path": "data/pictures/none.jpg",
+        "id": 4,
+        "ekg_tests": []
+    },
+    {
+        "date_of_birth": "1999",
+        "firstname": "An",
+        "lastname": "Dre",
+        "picture_path": "data/pictures/none.jpg",
+        "id": 5,
+        "ekg_tests": []
+    },
+    {
+        "date_of_birth": "1999",
+        "firstname": "sd",
+        "lastname": "dd",
+        "picture_path": "data/pictures/none.jpg",
+        "id": 6,
+        "ekg_tests": []
     }
 ]
