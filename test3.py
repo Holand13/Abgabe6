@@ -94,12 +94,15 @@ if __name__ == "__main__":
             new_person["firstname"] = st.text_input("Vorname")
             new_person["lastname"] = st.text_input("Nachname")
             year = st.text_input("Geburtsjahr (z.B. 1999)")
-            try:
-                new_person["date_of_birth"] = int(year)
-                valid_year = True
-            except ValueError:
-                st.error("Bitte geben Sie ein gültiges Geburtsjahr ein.")
-                valid_year = False
+            if year is True:
+                try:
+                    new_person["date_of_birth"] = int(year)
+                    valid_year = True
+                except ValueError:
+                    st.error("Bitte geben Sie ein gültiges Geburtsjahr ein.")
+                    valid_year = False
+            else:
+                valid_year = None
             new_person["picture_path"] = "data/pictures/none.jpg"
             new_person["ekg_tests"] = []
             new_person["id"] = Person.get_new_id()
