@@ -1,8 +1,7 @@
 import streamlit as st
-from ekgdata import EKGdata
+from ekgdata2 import EKGdata
 from person2 import Person
 from datetime import date
-
 
 if __name__ == "__main__":
     #Passwort = 1234 und Nutzername = Nutzername
@@ -58,7 +57,7 @@ if __name__ == "__main__":
             # Load person data and populate all_ekg_data class variable
             person_data = Person.load_person_data()
             for person in person_data:
-                EKGdata.all_ekg_data.extend(person["ekg_tests"])
+                EKGdata.all_ekg_daten.extend(person["ekg_tests"])
             tab1, tab2 = st.tabs(["Personenangabe", "EKG-Tests"])
             with tab1:
                 person_names = Person.get_person_list(person_data)
@@ -82,10 +81,13 @@ if __name__ == "__main__":
                             ekg_by_id.find_peaks(threshold=320, distance=150)
                             st.write(ekg_by_id.estimate_hr())
                             ekg_by_id.display_test_date_and_plot()  
+
+
                         else:
                             st.write("Keine EKG-Daten mit der gegebenen ID gefunden.")
                     else:
                         st.write("Keine Person mit diesem Namen gefunden.")
+
         
         elif selected_page == "Neuen Datensatz anlegen":
             st.title("Neuen Datensatz anlegen")
