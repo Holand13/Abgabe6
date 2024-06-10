@@ -1,11 +1,12 @@
 import streamlit as st
 from ekgdata import EKGdata
-from person2 import Person
+from person import Person
 from datetime import date
 
 
 if __name__ == "__main__":
     #Passwort = 1234 und Nutzername = Nutzername
+
     def creds_entered():
         if st.session_state["user"].strip() == "Nutzername" and st.session_state["password"].strip() == "1234":
             st.session_state["logged_in"] = True
@@ -33,7 +34,7 @@ if __name__ == "__main__":
             if st.button("Anmelden"):
                 creds_entered()
             return False
-
+    
     if authenticate_user():
         # Seitenleiste für Navigation
         with st.sidebar:
@@ -47,8 +48,7 @@ if __name__ == "__main__":
                 st.session_state["logged_in"] = False
                 st.session_state["user"] = ""
                 st.session_state["password"] = ""
-                st.experimental_rerun()
-
+   
         if selected_page == "Start":
             st.title("EKG Data Analysis Tool")
             st.write("Willkommen im EKG Data Analysis Tool.")
@@ -89,7 +89,21 @@ if __name__ == "__main__":
         
         elif selected_page == "Neuen Datensatz anlegen":
             st.title("Neuen Datensatz anlegen")
-    
+        # Create a new person
+            st.write("Bitte geben Sie die Daten der neuen Person ein.")
+            new_person = {}
+            new_person["firstname"] = st.text_input("Vorname")
+            new_person["lastname"] = st.text_input("Nachname")
+            min_date = date(1900, 1, 1)
+            max_date = date.today()
+            new_person["date_of_birth"] = st.date_input("Geburtsdatum", min_value=min_date, max_value=max_date)
+            new_person["picture_path"] = "data/pictures/none.jpg"
+            #neue id erstellen
+            new_person["id"] = Person.get_new_id()
+            if st.button("Person anlegen"):
+                new_person_obj = Person(new_person)
+                new_person_obj.save_person()
+                st.success("Person erfolgreich angelegt.")
     
         elif selected_page == "Einstellungen":
             st.title("Einstellungen")

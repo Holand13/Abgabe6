@@ -4,18 +4,13 @@ import pandas as pd
 import plotly.express as px
 
 
-class Person:
+class Person2:
     
     @staticmethod
     def load_person_data():
         """A Function that knows where te person Database is and returns a Dictionary with the Persons"""
-        
         file = open("data/person_db.json")
         person_data = json.load(file)
-        '''
-        with open("data/person_db.json") as file:
-            person_data = [json.loads(line) for line in file]
-        '''
         return person_data
 
     @staticmethod
@@ -87,18 +82,16 @@ class Person:
         max_hr_bpm =  223 - 0.9 * self.calc_age()
         self.max_hr_bpm = max_hr_bpm
         return int(max_hr_bpm)
-
-
-
-
+    
+    '''
     def get_new_id():
         person_data = Person.load_person_data()
-        if person_data:
-            return person_data[-1]["id"] + 1
-        else:
-            return 1
-        
-    def save_person(self):
-        person_data = Person.load_person_data()
-        person_data.append(self.__dict__)
-        json.dump(person_data)
+        max_id = 0
+        for eintrag in person_data:
+            if eintrag["id"] > max_id:
+                max_id = eintrag["id"]
+        return max_id + 1
+    
+
+    #datensatz in json file hinzufügen
+'''

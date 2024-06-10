@@ -1,6 +1,6 @@
 import streamlit as st
 from ekgdata import EKGdata
-from person import Person
+from person2 import Person
 from datetime import datetime
 
 if __name__ == "__main__":
