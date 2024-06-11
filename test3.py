@@ -2,7 +2,7 @@ import streamlit as st
 from ekgdata import EKGdata
 from person import Person
 from datetime import date
-
+from oploadfile import upload
 
 if __name__ == "__main__":
     #Passwort = 1234 und Nutzername = Nutzername
@@ -93,25 +93,34 @@ if __name__ == "__main__":
             new_person = {}
             new_person["firstname"] = st.text_input("Vorname")
             new_person["lastname"] = st.text_input("Nachname")
-            year = st.text_input("Geburtsjahr (z.B. 1999)")
-            if year is True:
-                try:
-                    new_person["date_of_birth"] = int(year)
-                    valid_year = True
-                except ValueError:
-                    st.error("Bitte geben Sie ein gültiges Geburtsjahr ein.")
-                    valid_year = False
-            else:
-                valid_year = None
-            new_person["picture_path"] = "data/pictures/none.jpg"
+            min_date = date(1900, 1, 1)
+            max_date = date.today()
+            ndate = st.text_input("Geburtsjahr")
+            try:
+                if ndate.isdigit():
+                    new_person["date_of_birth"] = int(ndate)
+            except ValueError:
+                st.error("Geburtsjahr muss eine Zahl sein.")
             new_person["ekg_tests"] = []
+            # neue ID erstellen
             new_person["id"] = Person.get_new_id()
+            file_path = upload()  # Call the upload function from uploader module
+            if file_path:
+                new_person["picture_path"] = file_path
+            else:
+                new_person["picture_path"] = "data/pictures/none.jpg"
+            
             if st.button("Person anlegen"):
-                new_person_obj = Person(new_person)
-                new_person_obj.save_person()
-                st.success("Person erfolgreich angelegt.")
-                st.experimental_rerun()
-    
+                try:
+                    new_person_obj = Person(new_person)
+                    new_person_obj.save_person()
+                    st.success("Person erfolgreich angelegt.")
+                    st.experimental_rerun()
+                except KeyError as e:
+                    st.error(f"Fehlender Schlüssel in Personendaten: {e}")
+                except ValueError as e:
+                    st.error(f"Ungültiger Wert in Personendaten: {e}")
+
         elif selected_page == "Einstellungen":
             st.title("Einstellungen")
             st.write("Einstellungen ändern.")

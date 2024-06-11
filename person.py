@@ -69,13 +69,18 @@ class Person:
        
         
     def __init__(self, person_dict):
-        self.date_of_birth = int(person_dict["date_of_birth"])
         self.firstname = person_dict["firstname"]
         self.lastname = person_dict["lastname"]
         self.picture_path = person_dict["picture_path"]
         self.id = person_dict["id"]
         self.ekg_tests = person_dict.get("ekg_tests", [])  # Initialize ekg_tests with an empty list if not present
-        
+        if "date_of_birth" in person_dict:
+            try:
+                self.date_of_birth = int(person_dict["date_of_birth"])
+            except ValueError:
+                raise ValueError(f"Invalid date_of_birth value: {person_dict['date_of_birth']}")
+        else:
+            raise KeyError("Missing key 'date_of_birth' in person data")
 
     def calc_age(self):
         today = datetime.now().date()
@@ -88,8 +93,6 @@ class Person:
         max_hr_bpm =  223 - 0.9 * self.calc_age()
         self.max_hr_bpm = max_hr_bpm
         return int(max_hr_bpm)
-
-
 
 
     def get_new_id():
