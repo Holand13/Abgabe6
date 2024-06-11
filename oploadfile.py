@@ -16,19 +16,22 @@ def save_uploaded_file(uploaded_file, directory="data\pictures"):
 def upload():
     uploaded_file = st.file_uploader("Bild hochladen", type=["jpg", "jpeg", "png"])
 
-    if uploaded_file is not None:
-        file_details = {"Filename": uploaded_file.name, "FileType": uploaded_file.type, "FileSize": uploaded_file.size}
-        st.write(file_details)
+    if uploaded_file is not None:     
+        if st.button("Überprüfen"):
+            image = Image.open(io.BytesIO(uploaded_file.read()))
+            st.image(image, caption = "Hochgeladenes Profilbild", use_column_width=True)
 
         if uploaded_file.type == "image/jpeg":
             file_path = save_uploaded_file(uploaded_file)
             st.write("Bild wurde erfolgreich hochgeladen")
         else:
             image = Image.open(io.BytesIO(uploaded_file.read()))
+            st.image(image, caption = "Hochgeladenes Profilbild", use_column_width=True)
             file_path = os.path.join("data/pictures", uploaded_file.name.split('.')[0] + ".jpg")
             image.save(file_path, "JPEG")
             st.write("Bild wurde erfolgreich gespeichert")
-        
+       
+
         return file_path
     return None
 
