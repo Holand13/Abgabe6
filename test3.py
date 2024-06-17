@@ -1,5 +1,5 @@
 import streamlit as st
-from ekgdata import EKGdata
+from ekgdata2 import EKGdata
 from person import Person
 from datetime import date
 from oploadfile import upload
@@ -58,7 +58,7 @@ if __name__ == "__main__":
             # Load person data and populate all_ekg_data class variable
             person_data = Person.load_person_data()
             for person in person_data:
-                EKGdata.all_ekg_data.extend(person.get("ekg_tests", []))  # Use get method to avoid KeyError
+                EKGdata.all_ekg_daten.extend(person.get("ekg_tests", []))  # Use get method to avoid KeyError
             tab1, tab2 = st.tabs(["Personenangabe", "EKG-Tests"])
             with tab1:
                 person_names = Person.get_person_list(person_data)

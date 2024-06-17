@@ -27,7 +27,7 @@ class Person2:
         """ Eine Funktion der Nachname, Vorname als ein String übergeben wird
         und die die Person als Dictionary zurück gibt"""
 
-        person_data = Person.load_person_data()
+        person_data = Person2.load_person_data()
         #print(suchstring)
         if suchstring == "None":
             return {}
@@ -48,7 +48,7 @@ class Person2:
     @staticmethod
     def find_person_data_by_id(person_id):
         """A Function that takes an ID and returns the person as a dictionary"""
-        person_data = Person.load_person_data()
+        person_data = Person2.load_person_data()
         for eintrag in person_data:
             if eintrag["id"] == person_id:
                 return eintrag

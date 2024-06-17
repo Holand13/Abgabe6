@@ -1,6 +1,6 @@
 import streamlit as st
 from ekgdata2 import EKGdata
-from person2 import Person
+from person2 import Person2
 from datetime import date
 
 if __name__ == "__main__":
@@ -55,17 +55,17 @@ if __name__ == "__main__":
         elif selected_page == "Personen":
             st.title("EKG Data Analysis Tool")
             # Load person data and populate all_ekg_data class variable
-            person_data = Person.load_person_data()
+            person_data = Person2.load_person_data()
             for person in person_data:
                 EKGdata.all_ekg_daten.extend(person["ekg_tests"])
             tab1, tab2 = st.tabs(["Personenangabe", "EKG-Tests"])
             with tab1:
-                person_names = Person.get_person_list(person_data)
+                person_names = Person2.get_person_list(person_data)
                 selected_person_name = st.selectbox("Wählen Sie eine Person", ["Auswählen"] + person_names)
                 if selected_person_name != "Auswählen":
-                    person_dict = Person.find_person_data_by_name(selected_person_name)
+                    person_dict = Person2.find_person_data_by_name(selected_person_name)
                     if person_dict:
-                        person_objekt = Person(person_dict)
+                        person_objekt = Person2(person_dict)
                         st.write(f"Name: {person_objekt.firstname} {person_objekt.lastname}")
                         st.write(f"Geburtsdatum: {person_objekt.date_of_birth}")
                         st.image(person_objekt.picture_path)
