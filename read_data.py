@@ -1,4 +1,8 @@
 import json
+import streamlit as st
+from PIL import Image
+import io
+import os
 
 def get_person_data():
 # Opening JSON file
@@ -39,9 +43,3 @@ def find_person_data_by_name(suchstring):
     else:
         return {}
 
-if __name__ == "__main__" :
-    person_data = get_person_data()
-    person_names_list = get_person_names(person_data)
-    #print(person_names_list)
-    suchstring ='Schmirander , Yunus'
-    print(find_person_data_by_name(suchstring))

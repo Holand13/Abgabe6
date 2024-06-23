@@ -3,6 +3,9 @@ from datetime import datetime
 import pandas as pd
 import plotly.express as px
 import streamlit as st
+import os
+from PIL import Image
+import io
 
 class Person:
     
@@ -121,3 +124,4 @@ class Person:
                 break
         with open("data/person_db.json", "w", encoding='utf-8') as file:
             json.dump(person_data, file, indent=4)
+

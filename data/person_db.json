@@ -49,7 +49,7 @@
     {
         "firstname": "Sara",
         "lastname": "Hau",
-        "picture_path": "data/pictures/none.jpg",
+        "picture_path": "data\\pictures\\FordModellA.jpg",
         "id": 4,
         "ekg_tests": [],
         "date_of_birth": "2000",
