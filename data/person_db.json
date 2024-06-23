@@ -47,43 +47,13 @@
         ]
     },
     {
-        "firstname": "Andreas",
-        "lastname": "Holzner",
+        "firstname": "Sara",
+        "lastname": "Hau",
         "picture_path": "data/pictures/none.jpg",
         "id": 4,
         "ekg_tests": [],
-        "date_of_birth": "1998"
-    },
-    {
-        "firstname": "Carina",
-        "lastname": "Tilg",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 5,
-        "ekg_tests": [],
-        "date_of_birth": "2001"
-    },
-    {
-        "firstname": "Andreas",
-        "lastname": "Hofer",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 6,
-        "ekg_tests": [],
-        "date_of_birth": "1997"
-    },
-    {
-        "firstname": "Andre",
-        "lastname": "KLk",
-        "picture_path": "data\\pictures\\FordModellA.jpg",
-        "id": 7,
-        "ekg_tests": [],
-        "date_of_birth": "2002"
-    },
-    {
-        "firstname": "hh",
-        "lastname": "kk",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 8,
-        "ekg_tests": [],
-        "date_of_birth": "2003"
+        "date_of_birth": "2000",
+        "age": 24,
+        "max_hr_bpm": 201.4
     }
 ]

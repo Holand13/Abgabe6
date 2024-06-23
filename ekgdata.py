@@ -6,11 +6,11 @@ import plotly.graph_objs as go
 import streamlit as st
 
 
-class EKGdata:
+class EKGdata: #Klasse EKGdata
     # Class variable to hold all EKG data
     all_ekg_data = []
 
-    def __init__(self, ekg_dict):
+    def __init__(self, ekg_dict): #Konstruktor
         self.id = ekg_dict["id"]
         self.date = ekg_dict["date"]
         self.data = ekg_dict["result_link"]
@@ -18,7 +18,7 @@ class EKGdata:
         self.df['Time in s'] = self.df['Time in ms'] / 1000  # Konvertieren der Zeit von Millisekunden in Sekunden
 
     @staticmethod
-    def find_ekg_data_by_id(ekg_id):
+    def find_ekg_data_by_id(ekg_id): #Die EKG-Daten werden anhand der ID gesucht
         """A Function that takes an ID and returns the EKG data as a dictionary"""
         for ekg_dict in EKGdata.all_ekg_data:
             if ekg_dict["id"] == ekg_id:
@@ -26,51 +26,51 @@ class EKGdata:
         return None
 
     @classmethod
-    def load_by_id(self, ekg_id_input):
+    def load_by_id(self, ekg_id_input): #Die EKG-Daten werden anhand der ID geladen
         ekg_dict = self.find_ekg_data_by_id(ekg_id_input)
         if ekg_dict:
             return self(ekg_dict)
         else:
             return None
 
-    def find_peaks(self, threshold, distance):
+    def find_peaks(self, threshold, distance): #Die Peaks werden gesucht
         series = self.df['EKG in mV']
         peaks, _ = scipy.signal.find_peaks(series, height=threshold, distance=distance)
         self.peaks = peaks
         return peaks
 
-    def estimate_hr(self):
+    def estimate_hr(self): #Die Herzfrequenz wird geschätzt
         if self.peaks is not None:
             num_peaks = len(self.peaks)
             duration = self.df['Time in ms'].iloc[-1] - self.df['Time in ms'].iloc[0]
-            heart_rate = (num_peaks / duration) * 60000  # Convert to beats per minute
+            heart_rate = (num_peaks / duration) * 60000 # Herzfrequenz in Schlägen pro Minute
             print(f"Heart Rate: {heart_rate:.2f} bpm")
         else:
             print("No peaks found. Heart rate cannot be calculated.")
         self.heart_rate = heart_rate
         return heart_rate
 
-    def plot_time_series(self):
-        fig = go.Figure()
+    def plot_time_series(self): #Die Zeitreihe wird geplottet
+        fig = go.Figure() 
 
         # Add EKG time series data
-        fig.add_trace(go.Scatter(x=self.df['Time in s'], y=self.df['EKG in mV'],  
+        fig.add_trace(go.Scatter(x=self.df['Time in s'], y=self.df['EKG in mV'],  # EKG-Daten hinzufügen
                                  mode='lines', name='EKG in mV'))
 
         # Add peaks
-        if self.peaks is not None:
+        if self.peaks is not None: #Peaks hinzufügen
             fig.add_trace(go.Scatter(x=self.df['Time in s'].iloc[self.peaks],  
                                      y=self.df['EKG in mV'].iloc[self.peaks],
                                      mode='markers', name='Peaks',
                                      marker=dict(color='red', size=10, symbol='x')))
 
-        fig.update_layout(title='EKG Time Series with Peaks',
+        fig.update_layout(title='EKG Time Series with Peaks', #Layout des Plots
                           xaxis_title='Time in s',  
                           yaxis_title='EKG in mV')
 
         return fig
 
-    def display_test_date_and_plot(self):
+    def display_test_date_and_plot(self): #Das Testdatum wird angezeigt und die Zeitreihe wird geplottet
         st.plotly_chart(self.plot_time_series())  
         st.write(f"Test Datum: {self.date}")  # Anzeigen des Testdatums
          
