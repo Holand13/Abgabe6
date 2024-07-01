@@ -45,5 +45,15 @@
                 "result_link": "data/ekg_data/03_Ruhe.txt"
             }
         ]
+    },
+    {
+        "firstname": "Sara",
+        "lastname": "Hau",
+        "picture_path": "data\\pictures\\FordModellA.jpg",
+        "id": 4,
+        "ekg_tests": [],
+        "date_of_birth": "2000",
+        "age": 24,
+        "max_hr_bpm": 201.4
     }
 ]
