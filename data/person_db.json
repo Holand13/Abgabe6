@@ -45,45 +45,5 @@
                 "result_link": "data/ekg_data/03_Ruhe.txt"
             }
         ]
-    },
-    {
-        "firstname": "Andreas",
-        "lastname": "Holzner",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 4,
-        "ekg_tests": [],
-        "date_of_birth": "1998"
-    },
-    {
-        "firstname": "Carina",
-        "lastname": "Tilg",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 5,
-        "ekg_tests": [],
-        "date_of_birth": "2001"
-    },
-    {
-        "firstname": "Andreas",
-        "lastname": "Hofer",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 6,
-        "ekg_tests": [],
-        "date_of_birth": "1997"
-    },
-    {
-        "firstname": "Andre",
-        "lastname": "KLk",
-        "picture_path": "data\\pictures\\FordModellA.jpg",
-        "id": 7,
-        "ekg_tests": [],
-        "date_of_birth": "2002"
-    },
-    {
-        "firstname": "hh",
-        "lastname": "kk",
-        "picture_path": "data/pictures/none.jpg",
-        "id": 8,
-        "ekg_tests": [],
-        "date_of_birth": "2003"
     }
 ]
