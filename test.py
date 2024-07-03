@@ -18,6 +18,12 @@ from Garmin import (
 
 if __name__ == "__main__":
     #Passwort = 1234 und Nutzername = Nutzername
+    if "user" not in st.session_state:
+        st.session_state["user"] = ""
+    if "password" not in st.session_state:
+        st.session_state["password"] = ""
+    if "logged_in" not in st.session_state:
+        st.session_state["logged_in"] = False
     #Anmeldeseite
     def creds_entered():
         if st.session_state["user"].strip() == "Nutzername" and st.session_state["password"].strip() == "1234":
