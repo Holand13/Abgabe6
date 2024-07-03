@@ -1,0 +1,80 @@
+import streamlit as st
+import xml.etree.ElementTree as ET
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
+
+def parse_tcx(tcx_file):
+    tree = ET.parse(tcx_file)
+    root = tree.getroot()
+
+    namespaces = {'tcx': 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2'}
+    trackpoints = root.findall('.//tcx:Trackpoint', namespaces)
+
+    timestamps = []
+    heart_rates = []
+
+    for trackpoint in trackpoints:
+        time_element = trackpoint.find('tcx:Time', namespaces)
+        heart_rate_element = trackpoint.find('.//tcx:HeartRateBpm/tcx:Value', namespaces)
+
+        if time_element is not None and heart_rate_element is not None:
+            timestamp = datetime.strptime(time_element.text, '%Y-%m-%dT%H:%M:%S.%fZ')
+            heart_rate = int(heart_rate_element.text)
+            timestamps.append(timestamp)
+            heart_rates.append(heart_rate)
+
+    return timestamps, heart_rates
+
+def calculate_minutes_since_start(timestamps):
+    start_time = timestamps[0]
+    minutes_since_start = [(timestamp - start_time).total_seconds() / 60 for timestamp in timestamps]
+    return minutes_since_start
+
+def filter_data_by_time_range(timestamps, heart_rates, start_time_minutes, end_time_minutes):
+    start_time = timestamps[0] + timedelta(minutes=start_time_minutes)
+    end_time = timestamps[0] + timedelta(minutes=end_time_minutes)
+
+    filtered_timestamps = []
+    filtered_heart_rates = []
+
+    for ts, hr in zip(timestamps, heart_rates):
+        if start_time <= ts <= end_time:
+            filtered_timestamps.append(ts)
+            filtered_heart_rates.append(hr)
+
+    return filtered_timestamps, filtered_heart_rates
+
+def plot_hr_over_time_interactive(timestamps, heart_rates, start_time_minutes, end_time_minutes):
+    filtered_timestamps, filtered_heart_rates = filter_data_by_time_range(timestamps, heart_rates, start_time_minutes, end_time_minutes)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x=filtered_timestamps, y=filtered_heart_rates, mode='lines+markers', name='Heart Rate'))
+    
+    fig.update_layout(
+        title='Heart Rate over Time',
+        xaxis_title='Time',
+        yaxis_title='Heart Rate (bpm)',
+    )
+
+    return fig
+
+def main():
+    st.title('TCX File Heart Rate Analysis')
+
+    uploaded_file = st.file_uploader('Upload your TCX file', type='tcx')
+
+    if uploaded_file is not None:
+        timestamps, heart_rates = parse_tcx(uploaded_file)
+        minutes_since_start = calculate_minutes_since_start(timestamps)
+
+        min_time = min(minutes_since_start)
+        max_time = max(minutes_since_start)
+        
+        start_time, end_time = st.slider('Select Time Range (Minutes):', min_value=min_time, max_value=max_time, value=(min_time, max_time))
+
+        fig = plot_hr_over_time_interactive(timestamps, heart_rates, start_time, end_time)
+        st.plotly_chart(fig)
+
+if __name__ == '__main__':
+    main()

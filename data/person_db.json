@@ -55,5 +55,13 @@
         "date_of_birth": "2000",
         "age": 24,
         "max_hr_bpm": 201.4
+    },
+    {
+        "firstname": "Claude",
+        "lastname": "Hau",
+        "picture_path": "data\\pictures\\IMG_1574.JPG",
+        "id": 5,
+        "ekg_tests": [],
+        "date_of_birth": "1969"
     }
 ]

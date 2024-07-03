@@ -1,280 +1,200 @@
 
-import ezgpx
-
-# Parse GPX file
-gpx = ezgpx.GPX("Activity.gpx")
-
-# Plot with Folium
-gpx.folium_plot(tiles="OpenStreetMap",
-                color="orange",
-                start_stop_colors=("green", "red"),
-                way_points_color="blue",
-                minimap=True,
-                coord_popup=False,
-                title="Innsbruck-Runde",
-                zoom=8,
-                file_path="Map.Activity.html",
-                open=True)
-
-
-'''
-
-from xml.dom import minidom
-from datetime import *
-
-xmldoc = minidom.parse("Activity.tcx")
-print(xmldoc)
-
-
-tcd = xmldoc.getElementsByTagName("TrainingCenterDatabase")[0]
-
-activitiesElement = tcd.getElementsByTagName("Activities")[0]
-
-activities = activitiesElement.getElementsByTagName("Activity")
-
-for activity in activities:
-    sport = activity.attributes["Sport"]
-    sportName = sport.value
-
-    idElement = activity.getElementsByTagName("Id")[0]
-    timeOfDay = idElement.firstChild.data
-    year = int(timeOfDay[0:4])
-    month = int(timeOfDay[5:7])
-    day = int(timeOfDay[8:10])
-    date = datetime(year,month,day)
-    #print(sportName, month, day, year)
-    print(sportName, date)
-
-
-trackPoints = tcd.getElementsByTagName("Time")
-heartRate = tcd.getElementsByTagName("Value")
-
-
-print(type(trackPoints))
-print(type(heartRate))
-
-i=0
-
-while i <= 10:
-    print(trackPoints[i], heartRate[i])
-    i += 1
-
-'''
-'''
-from xml.dom import minidom
-from datetime import datetime
-import matplotlib.pyplot as plt
-
-# Parse TCX file
-xmldoc = minidom.parse("Activity.tcx")
-
-# Extract TrainingCenterDatabase
-tcd = xmldoc.getElementsByTagName("TrainingCenterDatabase")[0]
-
-# Extract Activities
-activitiesElement = tcd.getElementsByTagName("Activities")[0]
-activities = activitiesElement.getElementsByTagName("Activity")
-
-# Lists to store data
-timestamps = []
-heart_rates = []
-
-# Loop through each activity
-for activity in activities:
-    sport = activity.attributes["Sport"].value
-
-    idElement = activity.getElementsByTagName("Id")[0]
-    timeOfDay = idElement.firstChild.data
-    year = int(timeOfDay[0:4])
-    month = int(timeOfDay[5:7])
-    day = int(timeOfDay[8:10])
-    date = datetime(year, month, day)
-
-    # Extract TrackPoints and HeartRate values
-    trackpoints = activity.getElementsByTagName("Trackpoint")
-    for trackpoint in trackpoints:
-        timeElement = trackpoint.getElementsByTagName("Time")[0]
-        time = timeElement.firstChild.data
-        timestamp = datetime.fromisoformat(time.replace("Z", ""))
-
-        # Ensure all timestamps are datetime objects
-        if isinstance(timestamp, datetime):
-            timestamps.append(timestamp)
-
-        hr_elements = trackpoint.getElementsByTagName("HeartRateBpm")
-        if hr_elements:
-            hr_value = hr_elements[0].getElementsByTagName("Value")[0].firstChild.data
-            heart_rates.append(int(hr_value))
-        else:
-            heart_rates.append(None)
-
-# Print extracted data for verification
-print(timestamps[:5], heart_rates[:5])
-
-# Plotting the data
-plt.figure(figsize=(10, 6))
-# Convert timestamps to minutes
-timestamps_minutes = [(t - timestamps[0]).total_seconds() / 60 for t in timestamps]
-plt.plot(timestamps_minutes, heart_rates, color='orange', linestyle='-', marker='o', markersize=2)
-
-# Formatting the plot
-plt.title("Heart Rate Over Time")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Heart Rate (bpm)")
-plt.grid(True)
-plt.ylim(0)  # Set y-axis minimum to 0 bpm
-plt.tight_layout()
-
-# Display the plot
-plt.show()
-'''
-'''
-import matplotlib.pyplot as plt
-from xml.dom import minidom
-from datetime import datetime
-import scipy.signal
-import plotly.graph_objs as go
 import streamlit as st
+import gpxpy
+import folium
+from streamlit_folium import st_folium
+from geopy.distance import geodesic
 
+import xml.etree.ElementTree as ET
+import plotly.graph_objects as go
+from datetime import datetime, timedelta
 
-class TCXData:
-    def __init__(self, tcx_file):
-        self.tcx_file = tcx_file
-        self.timestamps = []
-        self.heart_rates = []
-        self.load_data()
+def calculate_distance_and_speed(gpx):
+    total_distance = 0.0 
+    total_time = 0.0 
 
-    def load_data(self):
-        xmldoc = minidom.parse(self.tcx_file)
-        tcd = xmldoc.getElementsByTagName("TrainingCenterDatabase")[0]
-        activitiesElement = tcd.getElementsByTagName("Activities")[0]
-        activities = activitiesElement.getElementsByTagName("Activity")
+    for track in gpx.tracks:
+        for segment in track.segments:
+            segment_distance = 0.0
+            segment_time = 0.0
+            for i in range(1, len(segment.points)):
+                point1 = segment.points[i - 1]
+                point2 = segment.points[i]
+                segment_distance += geodesic((point1.latitude, point1.longitude), (point2.latitude, point2.longitude)).km
+                segment_time += (point2.time - point1.time).total_seconds()
 
-        for activity in activities:
-            trackpoints = activity.getElementsByTagName("Trackpoint")
-            for trackpoint in trackpoints:
-                timeElement = trackpoint.getElementsByTagName("Time")[0]
-                time = timeElement.firstChild.data
-                timestamp = datetime.fromisoformat(time.replace("Z", ""))
-                self.timestamps.append(timestamp)
+            total_distance += segment_distance
+            total_time += segment_time
 
-                hr_elements = trackpoint.getElementsByTagName("HeartRateBpm")
-                if hr_elements:
-                    hr_value = hr_elements[0].getElementsByTagName("Value")[0].firstChild.data
-                    self.heart_rates.append(int(hr_value))
-                else:
-                    self.heart_rates.append(None)
+    # In Stunden:Minuten:Sekunden umschreiben
+    total_time_hours = total_time / 3600
+    hours = int(total_time_hours)
+    minutes = int((total_time_hours * 60) % 60)
+    seconds = int(total_time_hours * 3600 % 60)
 
-    def find_peaks(self, threshold, distance):
-        serie = self.heart_rates
-        peaks, _ = scipy.signal.find_peaks(serie, height=threshold, distance=distance)
-        return peaks
+    average_speed = total_distance / total_time_hours if total_time_hours > 0 else 0.0  # in km/h
 
-    def estimate_hr(self):
-        peaks = self.find_peaks(threshold=100, distance=100)
-        num_peaks = len(peaks)
-        duration = (self.timestamps[-1] - self.timestamps[0]).total_seconds()
-        herzfrequenz = (num_peaks / duration) * 60  # Umrechnen in Schläge pro Minute
-        return herzfrequenz
+    return total_distance, average_speed, f"{hours:02}:{minutes:02}:{seconds:02}"
 
-    def plot_time_series(self):
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=self.timestamps, y=self.heart_rates, mode='lines', name='Herzfrequenz'))
-        fig.update_layout(title='Herzfrequenz über die Zeit', xaxis_title='Zeit', yaxis_title='Herzfrequenz (bpm)')
-        return fig
+def folium_plot(gpx, tiles="OpenStreetMap", color="blue", start_stop_colors=("green", "red"),
+                way_points_color="blue", minimap=True, coord_popup=False,
+                zoom=8, file_path=None, open_in_browser=False):
+    """
+    Plot the GPX data on a Folium map.
 
+    Args:
+        gpx: Parsed GPX data.
+        tiles (str): Map tiles.
+        color (str): Line color for the route.
+        start_stop_colors (tuple): Colors for the start and stop markers.
+        way_points_color (str): Color for the waypoints.
+        minimap (bool): Show a minimap.
+        coord_popup (bool): Show a popup with coordinates when clicking on the map.
+        title (str): Title of the map.
+        zoom (int): Initial zoom level.
+        file_path (str): Path to save the map as an HTML file.
+        open_in_browser (bool): Open the map in a new browser tab.
+    """
+    start_coords = [gpx.tracks[0].segments[0].points[0].latitude, gpx.tracks[0].segments[0].points[0].longitude]
+    m = folium.Map(location=start_coords, zoom_start=zoom, tiles=tiles)
 
-# Streamlit-Anwendung
+    for track in gpx.tracks:
+        for segment in track.segments:
+            points = [(point.latitude, point.longitude) for point in segment.points]
+            folium.PolyLine(points, color=color, weight=2.5, opacity=1).add_to(m)
+
+            # Start und Stop markieren
+            folium.Marker(points[0], icon=folium.Icon(color=start_stop_colors[0]), popup="Start").add_to(m)
+            folium.Marker(points[-1], icon=folium.Icon(color=start_stop_colors[1]), popup="End").add_to(m)
+
+    if minimap:
+        minimap = folium.plugins.MiniMap(toggle_display=True)
+        m.add_child(minimap)
+
+    if coord_popup:
+        m.add_child(folium.LatLngPopup())
+
+    if file_path:
+        m.save(file_path)
+
+    if open_in_browser:
+        import webbrowser
+        webbrowser.open(file_path)
+
+    return m
+
+def parse_tcx(tcx_file):
+    tree = ET.parse(tcx_file)
+    root = tree.getroot()
+
+    namespaces = {'tcx': 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2'}
+    trackpoints = root.findall('.//tcx:Trackpoint', namespaces)
+
+    timestamps = []
+    heart_rates = []
+
+    for trackpoint in trackpoints:
+        time_element = trackpoint.find('tcx:Time', namespaces)
+        heart_rate_element = trackpoint.find('.//tcx:HeartRateBpm/tcx:Value', namespaces)
+
+        if time_element is not None and heart_rate_element is not None:
+            timestamp = datetime.strptime(time_element.text, '%Y-%m-%dT%H:%M:%S.%fZ')
+            heart_rate = int(heart_rate_element.text)
+            timestamps.append(timestamp)
+            heart_rates.append(heart_rate)
+
+    return timestamps, heart_rates
+
+def calculate_minutes_since_start(timestamps):
+    start_time = timestamps[0]
+    minutes_since_start = [(timestamp - start_time).total_seconds() / 60 for timestamp in timestamps]
+    return minutes_since_start
+
+def filter_data_by_time_range(timestamps, heart_rates, start_time_minutes, end_time_minutes):
+    start_time = timestamps[0] + timedelta(minutes=start_time_minutes)
+    end_time = timestamps[0] + timedelta(minutes=end_time_minutes)
+
+    filtered_timestamps = []
+    filtered_heart_rates = []
+
+    for ts, hr in zip(timestamps, heart_rates):
+        if start_time <= ts <= end_time:
+            filtered_timestamps.append(ts)
+            filtered_heart_rates.append(hr)
+
+    return filtered_timestamps, filtered_heart_rates
+
+def plot_hr_over_time_interactive(minutes_since_start, heart_rates, start_time_minutes, end_time_minutes):
+    filtered_minutes = []
+    filtered_heart_rates = []
+
+    for minute, hr in zip(minutes_since_start, heart_rates):
+        if start_time_minutes <= minute <= end_time_minutes:
+            filtered_minutes.append(minute)
+            filtered_heart_rates.append(hr)
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(x=filtered_minutes, y=filtered_heart_rates, mode='lines+markers', name='Heart Rate'))
+    
+    fig.update_layout(
+        title='Herzfrequenz über die Zeit',
+        xaxis_title='Zeit (Minuten)',
+        yaxis_title='Herzfrequenz (bpm)',
+    )
+
+    return fig
+
 def main():
-    st.title("Herzfrequenzanalyse aus TCX-Datei")
+    st.title("GPX und TCX Datenanalyse")
 
-    tcx_file = st.file_uploader("Wählen Sie eine TCX-Datei:", type=["tcx"])
-    if tcx_file is not None:
-        tcx_data = TCXData(tcx_file)
+    # GPX Datei hochladen
+    uploaded_gpx_file = st.file_uploader("GPX Datei hochladen", type='gpx')
+    
+    if uploaded_gpx_file is not None:
+        # GPX Datei lesen
+        gpx = gpxpy.parse(uploaded_gpx_file)
 
-        # Berechne Herzfrequenz
-        herzfrequenz = tcx_data.estimate_hr()
+        # Datum, Distanz, Geschwindigkeit und Dauer
+        total_distance, average_speed, total_duration = calculate_distance_and_speed(gpx)
+        activity_date = gpx.tracks[0].segments[0].points[0].time.strftime("%d-%m-%Y")
+        st.write(f"**Streckenanalyse**")
+        st.write(f"Datum: {activity_date}")
+        st.write(f"Distanz: {total_distance:.2f} km")
+        st.write(f"Durchschnitsgeschwindigkeit: {average_speed:.2f} km/h")
+        st.write(f"Gesamtdauer: {total_duration}")
 
-        # Plot
-        st.plotly_chart(tcx_data.plot_time_series())
+        # Karte mit zusätzlichen Optionen plotten
+        m = folium_plot(gpx, tiles="OpenStreetMap", color="blue", start_stop_colors=("green", "red"),
+                        way_points_color="blue", minimap=True, coord_popup=False,
+                        zoom=8)
 
-        # Anzeige der Herzfrequenz
-        st.write(f"Geschätzte Herzfrequenz: {herzfrequenz:.2f} bpm")
+        # Karte in Streamlit anzeigen
+        st.subheader("Karte")
+        st_folium(m, width=700, height=500)
 
+    st.markdown("---")
+
+    # TCX Datei hochladen
+    uploaded_tcx_file = st.file_uploader('TCX Datei hochladen', type='tcx')
+
+    if uploaded_tcx_file is not None:
+        timestamps, heart_rates = parse_tcx(uploaded_tcx_file)
+        minutes_since_start = calculate_minutes_since_start(timestamps)
+
+        # Datum der Aktivität anzeigen
+        activity_date = timestamps[0].strftime("%d-%m-%Y")
+        st.write(f"Datum: {activity_date}")
+
+        min_time = min(minutes_since_start)
+        max_time = max(minutes_since_start)
+
+        # Zeitbereich auswählen mit einem Slider
+        start_time, end_time = st.slider('Wählen Sie den Zeitbereich:', min_value=min_time, max_value=max_time, value=(min_time, max_time))
+
+        # Interaktive Herzfrequenz über Zeit anzeigen
+        fig = plot_hr_over_time_interactive(minutes_since_start, heart_rates, start_time, end_time)
+        st.plotly_chart(fig)
 
 if __name__ == "__main__":
     main()
-
-'''
-import matplotlib.pyplot as plt
-from xml.dom import minidom
-from datetime import datetime
-import plotly.graph_objs as go
-import plotly.io as pio
-
-# Parse TCX file
-xmldoc = minidom.parse("Activity.tcx")
-
-# Extract TrainingCenterDatabase
-tcd = xmldoc.getElementsByTagName("TrainingCenterDatabase")[0]
-
-# Extract Activities
-activitiesElement = tcd.getElementsByTagName("Activities")[0]
-activities = activitiesElement.getElementsByTagName("Activity")
-
-# Lists to store data
-timestamps = []
-heart_rates = []
-
-# Loop through each activity
-for activity in activities:
-    sport = activity.attributes["Sport"].value
-
-    idElement = activity.getElementsByTagName("Id")[0]
-    timeOfDay = idElement.firstChild.data
-    year = int(timeOfDay[0:4])
-    month = int(timeOfDay[5:7])
-    day = int(timeOfDay[8:10])
-    date = datetime(year, month, day)
-
-    # Extract TrackPoints and HeartRate values
-    trackpoints = activity.getElementsByTagName("Trackpoint")
-    for trackpoint in trackpoints:
-        timeElement = trackpoint.getElementsByTagName("Time")[0]
-        time = timeElement.firstChild.data
-        timestamp = datetime.fromisoformat(time.replace("Z", ""))
-
-        # Ensure all timestamps are datetime objects
-        if isinstance(timestamp, datetime):
-            timestamps.append(timestamp)
-
-        hr_elements = trackpoint.getElementsByTagName("HeartRateBpm")
-        if hr_elements:
-            hr_value = hr_elements[0].getElementsByTagName("Value")[0].firstChild.data
-            heart_rates.append(int(hr_value))
-        else:
-            heart_rates.append(None)
-
-# Convert timestamps to minutes
-timestamps_minutes = [(t - timestamps[0]).total_seconds() / 60 for t in timestamps]
-
-# Plotting the data with Matplotlib
-plt.figure(figsize=(10, 6))
-plt.plot(timestamps_minutes, heart_rates, color='blue', linestyle='-', marker='o', markersize=2)
-plt.title("Heart Rate Over Time")
-plt.xlabel("Time (minutes)")
-plt.ylabel("Heart Rate (bpm)")
-plt.grid(True)
-plt.tight_layout()
-
-# Display the plot
-plt.show()
-
-# Convert the plot to an interactive Plotly plot
-fig = go.Figure()
-fig.add_trace(go.Scatter(x=timestamps_minutes, y=heart_rates, mode='markers', marker=dict(color='blue')))
-fig.update_layout(title="Heart Rate Over Time (Plotly)",
-                  xaxis_title="Time (minutes)",
-                  yaxis_title="Heart Rate (bpm)",
-                  hovermode="closest")
-pio.show(fig)
