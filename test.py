@@ -54,7 +54,7 @@ if __name__ == "__main__":
         # Seitenleiste für Navigation
         with st.sidebar: # Seitenleiste
             st.title("Navigation")
-            selected_page = st.selectbox("Seite auswählen", ["Start", "Personen", "Neuen Datensatz anlegen", "GPX und TCX Dateien einlesen","Einstellungen"])
+            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Dateien einlesen","Einstellungen"])
 
             # Abmelde-Button am unteren Rand der Seitenleiste
             st.markdown("---")
@@ -64,14 +64,12 @@ if __name__ == "__main__":
                 st.session_state["logged_in"] = False
                 st.session_state["user"] = ""
                 st.session_state["password"] = ""
-   
-        if selected_page == "Start": # Startseite
-            st.title("EKG Data Analysis Tool")
-            st.write("Willkommen im EKG Data Analysis Tool.")
+    
+
 
 
         
-        elif selected_page == "Personen": # Personen-Seite
+        if selected_page == "Personen": # Personen-Seite
             st.title("EKG Data Analysis Tool")
             # Load person data and populate all_ekg_data class variable
             person_data = Person.load_person_data() # Personendaten laden
@@ -135,8 +133,8 @@ if __name__ == "__main__":
                     else:
                         st.write("Keine Person mit diesem Namen gefunden.")
 
-        elif selected_page == "Neuen Datensatz anlegen": # Neue Person anlegen
-            st.title("Neuen Datensatz anlegen")
+        elif selected_page == "Neue Person anlegen": # Neue Person anlegen
+            st.title("Neue Person anlegen")
         # Create a new person
             st.write("Bitte geben Sie die Daten der neuen Person ein.")
             new_person = {} # Dictionary für neue Person
@@ -225,9 +223,18 @@ if __name__ == "__main__":
                 st.plotly_chart(fig)
 
         elif selected_page == "Einstellungen":
-            st.title("Einstellungen")
-            st.write("Einstellungen ändern.")
-            st.write("Benutzername ändern.")
-            st.text_input("Neuer Benutzername")
-            st.write("Passwort ändern.")
-            st.text_input("Neues Passwort", type="password")
+            def change_credentials(new_user, new_password):
+                st.session_state["user"] = new_user
+                st.session_state["password"] = new_password
+                st.success("Benutzername und Passwort wurden erfolgreich geändert!")
+
+
+            if authenticate_user():
+                st.title("Einstellungen")
+                st.write("Einstellungen ändern.")
+        
+            new_user = st.text_input("Neuer Benutzername", value=st.session_state["user"])
+            new_password = st.text_input("Neues Passwort", type="password")
+        
+            if st.button("Speichern"):
+                change_credentials(new_user, new_password)
