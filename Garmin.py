@@ -39,22 +39,7 @@ def calculate_distance_and_speed(gpx):
 def folium_plot(gpx, tiles="OpenStreetMap", color="blue", start_stop_colors=("green", "red"),
                 way_points_color="blue", minimap=True, coord_popup=False,
                 zoom=8, file_path=None, open_in_browser=False):
-    """
-    Plot the GPX data on a Folium map.
 
-    Args:
-        gpx: Parsed GPX data.
-        tiles (str): Map tiles.
-        color (str): Line color for the route.
-        start_stop_colors (tuple): Colors for the start and stop markers.
-        way_points_color (str): Color for the waypoints.
-        minimap (bool): Show a minimap.
-        coord_popup (bool): Show a popup with coordinates when clicking on the map.
-        title (str): Title of the map.
-        zoom (int): Initial zoom level.
-        file_path (str): Path to save the map as an HTML file.
-        open_in_browser (bool): Open the map in a new browser tab.
-    """
     start_coords = [gpx.tracks[0].segments[0].points[0].latitude, gpx.tracks[0].segments[0].points[0].longitude]
     m = folium.Map(location=start_coords, zoom_start=zoom, tiles=tiles)
 
