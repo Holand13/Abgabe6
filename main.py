@@ -1,11 +1,29 @@
+
 import streamlit as st
 from ekgdata2 import EKGdata
 from person import Person
 from datetime import date
 from oploadfile import upload
+import gpxpy
+import folium
+from streamlit_folium import st_folium
+from geopy.distance import geodesic
+from Garmin import (
+    calculate_distance_and_speed,
+    folium_plot,
+    parse_tcx,
+    calculate_minutes_since_start,
+    plot_hr_over_time_interactive,
+)
 
 if __name__ == "__main__":
     #Passwort = 1234 und Nutzername = Nutzername
+    if "user" not in st.session_state:
+        st.session_state["user"] = ""
+    if "password" not in st.session_state:
+        st.session_state["password"] = ""
+    if "logged_in" not in st.session_state:
+        st.session_state["logged_in"] = False
     #Anmeldeseite
     def creds_entered():
         if st.session_state["user"].strip() == "Nutzername" and st.session_state["password"].strip() == "1234":
@@ -42,7 +60,7 @@ if __name__ == "__main__":
         # Seitenleiste für Navigation
         with st.sidebar: # Seitenleiste
             st.title("Navigation")
-            selected_page = st.selectbox("Seite auswählen", ["Start", "Personen", "Neuen Datensatz anlegen", "Einstellungen"])
+            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Dateien einlesen","Einstellungen"])
 
             # Abmelde-Button am unteren Rand der Seitenleiste
             st.markdown("---")
@@ -52,14 +70,12 @@ if __name__ == "__main__":
                 st.session_state["logged_in"] = False
                 st.session_state["user"] = ""
                 st.session_state["password"] = ""
-   
-        if selected_page == "Start": # Startseite
-            st.title("EKG Data Analysis Tool")
-            st.write("Willkommen im EKG Data Analysis Tool.")
+    
+
 
 
         
-        elif selected_page == "Personen": # Personen-Seite
+        if selected_page == "Personen": # Personen-Seite
             st.title("EKG Data Analysis Tool")
             # Load person data and populate all_ekg_data class variable
             person_data = Person.load_person_data() # Personendaten laden
@@ -122,8 +138,9 @@ if __name__ == "__main__":
                             st.write("Keine EKG-Daten mit der gegebenen ID gefunden.")
                     else:
                         st.write("Keine Person mit diesem Namen gefunden.")
-        elif selected_page == "Neuen Datensatz anlegen": # Neue Person anlegen
-            st.title("Neuen Datensatz anlegen")
+
+        elif selected_page == "Neue Person anlegen": # Neue Person anlegen
+            st.title("Neue Person anlegen")
         # Create a new person
             st.write("Bitte geben Sie die Daten der neuen Person ein.")
             new_person = {} # Dictionary für neue Person
@@ -159,10 +176,71 @@ if __name__ == "__main__":
                     except ValueError as e:
                         st.error(f"Ungültiger Wert in Personendaten: {e}")
 
+
+        elif selected_page == "GPX und TCX Dateien einlesen":
+            st.title("GPX und TCX Datenanalyse")
+
+            # GPX Datei hochladen
+            uploaded_gpx_file = st.file_uploader("GPX Datei hochladen", type='gpx')
+        
+            if uploaded_gpx_file is not None:
+                # GPX Datei lesen
+                gpx = gpxpy.parse(uploaded_gpx_file)
+
+                # Datum, Distanz, Geschwindigkeit und Dauer
+                total_distance, average_speed, total_duration = calculate_distance_and_speed(gpx)
+                activity_date = gpx.tracks[0].segments[0].points[0].time.strftime("%d-%m-%Y")
+                st.write(f"**Streckenanalyse**")
+                st.write(f"Datum: {activity_date}")
+                st.write(f"Distanz: {total_distance:.2f} km")
+                st.write(f"Durchschnitsgeschwindigkeit: {average_speed:.2f} km/h")
+                st.write(f"Gesamtdauer: {total_duration}")
+
+                # Karte mit zusätzlichen Optionen plotten
+                m = folium_plot(gpx, tiles="OpenStreetMap", color="blue", start_stop_colors=("green", "red"),
+                                way_points_color="blue", minimap=True, coord_popup=False,
+                                zoom=8)
+
+                # Karte in Streamlit anzeigen
+                st.subheader("Karte")
+                st_folium(m, width=700, height=500)
+
+            st.markdown("---")
+
+            # TCX Datei hochladen
+            uploaded_tcx_file = st.file_uploader('TCX Datei hochladen', type='tcx')
+
+            if uploaded_tcx_file is not None:
+                timestamps, heart_rates = parse_tcx(uploaded_tcx_file)
+                minutes_since_start = calculate_minutes_since_start(timestamps)
+
+                # Datum der Aktivität anzeigen
+                activity_date = timestamps[0].strftime("%d-%m-%Y")
+                st.write(f"Datum: {activity_date}")
+
+                min_time = min(minutes_since_start)
+                max_time = max(minutes_since_start)
+
+                # Zeitbereich auswählen mit einem Slider
+                start_time, end_time = st.slider('Wählen Sie den Zeitbereich:', min_value=min_time, max_value=max_time, value=(min_time, max_time))
+
+                # Interaktive Herzfrequenz über Zeit anzeigen
+                fig = plot_hr_over_time_interactive(minutes_since_start, heart_rates, start_time, end_time)
+                st.plotly_chart(fig)
+
         elif selected_page == "Einstellungen":
-            st.title("Einstellungen")
-            st.write("Einstellungen ändern.")
-            st.write("Benutzername ändern.")
-            st.text_input("Neuer Benutzername")
-            st.write("Passwort ändern.")
-            st.text_input("Neues Passwort", type="password")
+            def change_credentials(new_user, new_password):
+                st.session_state["user"] = new_user
+                st.session_state["password"] = new_password
+                st.success("Benutzername und Passwort wurden erfolgreich geändert!")
+
+
+            if authenticate_user():
+                st.title("Einstellungen")
+                st.write("Einstellungen ändern.")
+        
+            new_user = st.text_input("Neuer Benutzername", value=st.session_state["user"])
+            new_password = st.text_input("Neues Passwort", type="password")
+        
+            if st.button("Speichern"):
+                change_credentials(new_user, new_password)
