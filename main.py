@@ -122,6 +122,18 @@ if __name__ == "__main__":
                                             st.experimental_rerun() 
                                         except ValueError:
                                             st.error("Geburtsjahr muss eine Zahl sein.")
+                            if st.button("Löschen"):
+                                st.session_state["confirm_delete"] = True
+                        
+                        if st.session_state.get("confirm_delete", False):
+                            st.write("Sind Sie sicher, dass Sie diese Person löschen möchten?")
+                            if st.button("Ja"):
+                                Person.delete_person_by_id(person_objekt.id)
+                                st.success(f"Person {person_objekt.firstname} {person_objekt.lastname} wurde gelöscht.")
+                                st.session_state["confirm_delete"] = False
+                                st.experimental_rerun()
+                            if st.button("Nein"):
+                                st.session_state["confirm_delete"] = False
 
                 
             with tab2: # EKG-Tests

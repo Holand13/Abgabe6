@@ -125,3 +125,18 @@ class Person:
         with open("data/person_db.json", "w", encoding='utf-8') as file:
             json.dump(person_data, file, indent=4)
 
+    @staticmethod
+    def delete_person_by_id(person_id):
+        try:
+            with open('data/person_db.json', 'r') as f:
+                data = json.load(f)
+
+            data = [person for person in data if person["id"] != person_id]
+
+            with open('data/person_db.json', 'w') as f:
+                json.dump(data, f, indent=4)
+
+            return True
+        except Exception as e:
+            print(f"Fehler beim Löschen der Person: {e}")
+            return False
