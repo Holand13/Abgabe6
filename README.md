@@ -1,9 +1,3 @@
-`python -m venv .venv`
-`.venv\Scripts\Activate`
-`pip install streamlit`
-`pip freeze > requirements.txt`
-`streamlit run main.py`
-
 # EKG Data Analysis Tool
 
 Diese APP implementiert ein EKG-Datenanalysetool in Python, das mithilfe von Streamlit als Benutzeroberfläche entwickelt wurde.
@@ -14,7 +8,7 @@ Diese APP implementiert ein EKG-Datenanalysetool in Python, das mithilfe von Str
   - Möglichkeit neue Personendaten anzulegen und zu bearbeiten
 - **Routen- und Herzfrequenzvisualisierung (GPX und TCX)**
   - Ermöglicht das Hochladen und Analysieren von GPX- und TCX-Dateien für Aktivitätsdaten.
-  - Zeigt Distanz, Geschwindigkeit und interaktive Herzfrequenzplots über Zeit an.
+  - Zeigt Distanz, Geschwindigkeit und interaktive Herzfrequenzplots über die Zeit an.
 
 ## Setup
 
@@ -50,18 +44,21 @@ Geben Sie den Benutzernamen "Nutzername" und das Passwort "1234" ein, um sich an
 
 2. Navigation
 
-Verwenden Sie die Seitenleiste, um zwischen den verschiedenen Funktionen der Anwendung zu navigieren (Personen, Neue Person anlegen, GPX und TCX Datenanalyse, Einstellungen).
+Verwenden Sie die Seitenleiste, um zwischen den verschiedenen Funktionen der APP zu navigieren (Personen, Neue Person anlegen, GPX und TCX Datenanalyse, Einstellungen).
 
 3. Personen verwalten
 
-Auf der "Personen"-Seite können Sie Informationen zu Personen anzeigen, bearbeiten und neue Personen hinzufügen.
-EKG-Tests analysieren
+Auf der "Personen"-Seite können Sie Informationen zu Personen anzeigen, bearbeiten und EKG-Tests analysieren.
 Wählen Sie eine Person und einen EKG-Test aus, um Details wie die Herzfrequenz und die Zeitreihe der EKG-Daten anzuzeigen.
 
-4. GPX und TCX Daten analysieren
+4. Neu Person anlegen
+
+Auf dieser Seite können neue Personendaten angelegt werden.
+
+5. GPX und TCX Datenanalyse
 
 Laden Sie GPX- und TCX-Dateien hoch, um Aktivitätsdaten zu analysieren und Karten sowie interaktive Herzfrequenzplots anzuzeigen.
 
-5. Einstellungen
+6. Einstellungen
 
 Ändern Sie Benutzername und Passwort in den Einstellungen der Anwendung.
