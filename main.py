@@ -60,7 +60,7 @@ if __name__ == "__main__":
         # Seitenleiste für Navigation
         with st.sidebar: # Seitenleiste
             st.title("Navigation")
-            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Dateien einlesen","Einstellungen"])
+            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Datenanalyse","Einstellungen"])
 
             # Abmelde-Button am unteren Rand der Seitenleiste
             st.markdown("---")
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                         st.error(f"Ungültiger Wert in Personendaten: {e}")
 
 
-        elif selected_page == "GPX und TCX Dateien einlesen":
+        elif selected_page == "GPX und TCX Datenanalyse":
             st.title("GPX und TCX Datenanalyse")
 
             # GPX Datei hochladen
