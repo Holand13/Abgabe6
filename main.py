@@ -60,7 +60,7 @@ if __name__ == "__main__":
         # Seitenleiste für Navigation
         with st.sidebar: # Seitenleiste
             st.title("Navigation")
-            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Datenanalyse","Einstellungen"])
+            selected_page = st.selectbox("Seite auswählen", [ "Personen", "Neue Person anlegen", "GPX und TCX Datenanalyse"])
 
             # Abmelde-Button am unteren Rand der Seitenleiste
             st.markdown("---")
@@ -240,19 +240,4 @@ if __name__ == "__main__":
                 fig = plot_hr_over_time_interactive(minutes_since_start, heart_rates, start_time, end_time)
                 st.plotly_chart(fig)
 
-        elif selected_page == "Einstellungen":
-            def change_credentials(new_user, new_password):
-                st.session_state["user"] = new_user
-                st.session_state["password"] = new_password
-                st.success("Benutzername und Passwort wurden erfolgreich geändert!")
 
-
-            if authenticate_user():
-                st.title("Einstellungen")
-                st.write("Einstellungen ändern.")
-        
-            new_user = st.text_input("Neuer Benutzername", value=st.session_state["user"])
-            new_password = st.text_input("Neues Passwort", type="password")
-        
-            if st.button("Speichern"):
-                change_credentials(new_user, new_password)

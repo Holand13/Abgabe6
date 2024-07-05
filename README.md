@@ -49,7 +49,7 @@ Verwenden Sie die Seitenleiste, um zwischen den verschiedenen Funktionen der APP
 3. Personen verwalten
 
 Auf der "Personen"-Seite können Sie Informationen zu Personen anzeigen, bearbeiten und EKG-Tests analysieren.
-Wählen Sie eine Person und einen EKG-Test aus, um Details wie die Herzfrequenz und die Zeitreihe der EKG-Daten anzuzeigen.
+Wählen Sie eine Person und einen EKG-Test aus, um Details wie die Herzfrequenz und die Zeitreihe der EKG-Daten anzuzeigen. Außerdem besteht die Möglichkeit die Person zu löschen.
 
 4. Neu Person anlegen
 
@@ -59,6 +59,3 @@ Auf dieser Seite können neue Personendaten angelegt werden.
 
 Laden Sie GPX- und TCX-Dateien hoch, um Aktivitätsdaten zu analysieren und Karten sowie interaktive Herzfrequenzplots anzuzeigen.
 
-6. Einstellungen
-
-Ändern Sie Benutzername und Passwort in den Einstellungen der Anwendung.
